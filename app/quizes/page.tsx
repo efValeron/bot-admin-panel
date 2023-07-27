@@ -72,7 +72,6 @@ export default function Quizes() {
 
   const deleteQuiz = async (quizId: string) => {
     const url: string = `${mainUrl}/${quizId}/delete`
-    console.log("delete", quizId)
     try {
       const response = await axios.get(url, {
         headers: {
