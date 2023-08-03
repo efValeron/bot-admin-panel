@@ -1,6 +1,7 @@
-import React, {Fragment} from "react"
+import React, {Fragment, useState} from "react"
 import {Menu, Transition} from '@headlessui/react'
 import Link from "next/link";
+import {useRouter, useSearchParams } from 'next/navigation'
 
 type PropsType = {
   tableType: "clients" | "quizes"
@@ -9,16 +10,26 @@ type PropsType = {
 }
 
 export default function TheFilterForm(props: PropsType) {
+  const [filter, setFilter] = useState("All")
+  const searchParams = useSearchParams()
+  const router = useRouter()
+
   const classNames = (...classes: any[]) => {
     return classes.filter(Boolean).join(' ')
+  }
+
+  const capitalizedString = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+  const activeFilterHandler = (setToFilter: string) => {
+    setFilter(setToFilter)
+    router.push(`/quizes?filter[active]=${setToFilter === "active" ? "true" : "false"}`)
   }
 
   return (
     <div>
       <div className="py-3 px-6 flex flex-row-reverse gap-4 bg-bg-white-lighter">
         <Link href="/quizes/create"
-          type="button"
-          className="h-[36px] flex flex-row gap-2 items-end uppercase text-xs font-bold border border-green-500 bg-green-500 text-white rounded-md px-4 py-2 transition duration-100 select-none hover:bg-green-600 focus:outline-none focus:shadow-outline"
+              type="button"
+              className="h-[36px] flex flex-row gap-2 items-end uppercase text-xs font-bold border border-green-500 bg-green-500 text-white rounded-md px-4 py-2 transition duration-100 select-none hover:bg-green-600 focus:outline-none focus:shadow-outline"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
@@ -110,7 +121,7 @@ export default function TheFilterForm(props: PropsType) {
               <div>
                 <Menu.Button
                   className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                  Active
+                  Active: {capitalizedString(filter)}
                   <svg className="-mr-1 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg"
                        viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
                        strokeLinejoin="round">
@@ -135,7 +146,7 @@ export default function TheFilterForm(props: PropsType) {
                       {({active}) => (
                         <button
                           type="button"
-                          onClick={() => console.log("All")}
+                          onClick={() => activeFilterHandler("all")}
                           className={classNames(
                             active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                             'block w-full px-4 py-2 text-left text-sm'
@@ -151,7 +162,7 @@ export default function TheFilterForm(props: PropsType) {
                       {({active}) => (
                         <button
                           type="button"
-                          onClick={() => console.log("Active")}
+                          onClick={() => activeFilterHandler("active")}
                           className={classNames(
                             active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                             'block w-full px-4 py-2 text-left text-sm'
@@ -165,7 +176,7 @@ export default function TheFilterForm(props: PropsType) {
                       {({active}) => (
                         <button
                           type="button"
-                          onClick={() => console.log("Disabled")}
+                          onClick={() => activeFilterHandler("disabled")}
                           className={classNames(
                             active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                             'block w-full px-4 py-2 text-left text-sm'

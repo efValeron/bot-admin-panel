@@ -5,6 +5,7 @@ import {ClientsTableDataType} from "../app/clients/page";
 import {QuizesTableDataType} from "@/app/quizes/page";
 import TheModal from "@/components/TheModal";
 import Link from "next/link";
+import {useRouter} from 'next/navigation'
 
 type PropsType = {
   resultPerPage: number
@@ -17,6 +18,7 @@ export default function TheTable(props: PropsType) {
   const [modalOpen, setModalOpen] = useState(false)
   const [formOpen, setFormOpen] = useState(false)
   const [deleteQuiz, setDeleteQuiz] = useState("")
+  const router = useRouter()
 
   const closeModalFunc = (state: boolean) => {
     if (state !== modalOpen)
@@ -109,7 +111,10 @@ export default function TheTable(props: PropsType) {
                       <td
                         className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">{r.answerCount}</td>
                       <td
-                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">{r.questionCount}</td>
+                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">
+                        {/*<Link href={`/questions/${QUESTION COUNT}`}---------------------------------------------------------------------*/}
+                        {r.questionCount}
+                      </td>
 
                       <td className="px-6 py-4 whitespace-nowrap text-left text-sm font-medium">
                         <Link href={`quizes/edit/${r._id}`} type="button"
