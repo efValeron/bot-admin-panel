@@ -2,7 +2,7 @@
 import TheTable from "@/components/TheTable";
 import React, {useEffect, useState} from "react";
 import axios from "axios";
-import {useSearchParams} from 'next/navigation'
+import {AxiosHeaders, mainUrl} from "@/app/axiosParams";
 
 type TableRowType = {
   _id: string
@@ -28,7 +28,6 @@ export type QuizesTableDataType = {
 
 
 export default function Quizes() {
-  const mainUrl = "https://07a5-2a0b-6204-52bb-7700-68e9-135c-2e0a-5e6c.ngrok-free.app/api/category"
   const [tableData, setTableData] = useState<QuizesTableDataType>({
     tableType: "quizes",
     head: [
@@ -39,7 +38,8 @@ export default function Quizes() {
       total: 0
     }
   })
-  const [resultPerPage, setResultsPerPage] = useState(100)
+  const [resultPerPage, setResultsPerPage] = useState(2)
+  const [page, setPage] = useState(1)
 
   // const searchParams = useSearchParams()
   // const get = Object.fromEntries(searchParams.entries())
@@ -48,9 +48,7 @@ export default function Quizes() {
   const fetchData = async (url: string) => {
     try {
       const response = await axios.get(url, {
-        headers: {
-          "ngrok-skip-browser-warning": "any"
-        }
+        headers: AxiosHeaders
       })
       setTableData({
         tableType: "quizes",
@@ -74,9 +72,7 @@ export default function Quizes() {
     const url: string = `${mainUrl}/${quizId}/delete`
     try {
       const response = await axios.get(url, {
-        headers: {
-          "ngrok-skip-browser-warning": "any"
-        }
+        headers: AxiosHeaders
       })
       await fetchData(`${mainUrl}?by=sort&order=-1&page=1&limit=${resultPerPage}`)
     } catch (error) {

@@ -1,25 +1,38 @@
 import React, {useEffect, useState} from "react";
 import Link from "next/link";
-import {BodyType} from "@/app/quizes/edit/[id]/page";
+import {EditBodyType} from "@/app/quizes/edit/[id]/page";
+import {CreateBodyType} from "@/app/quizes/create/page";
 
-type EditPropsType = {
-  action: "edit"
-  data: object
-  id: string
-  updateQuiz: (data: BodyType) => void
+type PropsType = {
+  action: "edit" | "create"
+  data?: EditBodyType | CreateBodyType
+  id?: string
+  updateQuiz?: (data: EditBodyType) => void
+  addQuiz?: (data: CreateBodyType) => void
+  uniqueError: boolean
+  setUniqueErrorFunc: (state: boolean) => void
 }
 
-type CreatePropsType = any
+export default function TheEditForm(props: PropsType) {
+  const [inputsValues, setInputValues] = useState({
+    active: false,
+    code: "",
+    name: "",
+    description: "",
+    sort: 500,
+    _id: "",
+  })
 
-export default function TheEditForm(props: EditPropsType | CreatePropsType) {
-  const [inputsValues, setInputValues] = useState({...props.data})
-
-
-  useEffect(() => {
-    if (props.data) {
-      setInputValues(props.data);
-    }
-  }, [props.data]);
+  if (props.action === "edit") {
+    useEffect(() => {
+      if (props.data) {
+        setInputValues((prevInputValues) => ({
+          ...prevInputValues,
+          ...props.data,
+        }));
+      }
+    }, [props.data])
+  }
 
   const handleInputChange = (e: { target: { name: string; checked: boolean; }; }) => {
     const {name, checked} = e.target;
@@ -27,8 +40,12 @@ export default function TheEditForm(props: EditPropsType | CreatePropsType) {
   };
 
   const applyChanges = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    props.updateQuiz(inputsValues)
+    event.preventDefault();
+    if (props.action === "edit" && props.updateQuiz) {
+      props.updateQuiz(inputsValues);
+    } else if (props.action === "create" && props.addQuiz) {
+      props.addQuiz(inputsValues);
+    }
   }
 
   return (
@@ -36,8 +53,14 @@ export default function TheEditForm(props: EditPropsType | CreatePropsType) {
       <div className="space-y-12">
 
         <div className="border-b border-gray-900/10 pb-12">
-          <h2 className="text-lg font-semibold leading-7 text-gray-900">Edit quiz</h2>
-          <p className="mt-1 text-sm leading-6 text-gray-600">Editing {props.id} quiz</p>
+          {
+            props.action === "edit"
+              ? <>
+                <h2 className="text-lg font-semibold leading-7 text-gray-900">Edit quiz</h2>
+                <p className="mt-1 text-sm leading-6 text-gray-600">Editing {props.id} quiz</p>
+              </>
+              : <h2 className="text-lg font-semibold leading-7 text-gray-900">Creating quiz</h2>
+          }
 
           <div className="m-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
             {
@@ -52,7 +75,7 @@ export default function TheEditForm(props: EditPropsType | CreatePropsType) {
                       readOnly
                       type="text"
                       name="id"
-                      defaultValue={props.data._id}
+                      value={props.data?._id || ""}
                       autoComplete="given-name"
                       className="read-only:bg-gray-100 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                     />
@@ -73,7 +96,6 @@ export default function TheEditForm(props: EditPropsType | CreatePropsType) {
                   id="name"
                   onChange={e => setInputValues({...inputsValues, name: e.target.value})}
                   value={inputsValues.name}
-                  defaultValue={props.action === "edit" ? props.data.name : ""}
                   autoComplete="given-name"
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
@@ -90,13 +112,16 @@ export default function TheEditForm(props: EditPropsType | CreatePropsType) {
                   type="text"
                   name="code"
                   id="code"
-                  onChange={e => setInputValues({...inputsValues, code: e.target.value})}
+                  onChange={e => {
+                    props.setUniqueErrorFunc(false)
+                    setInputValues({...inputsValues, code: e.target.value})
+                  }}
                   value={inputsValues.code}
-                  defaultValue={props.action === "edit" ? props.data.code : ""}
                   autoComplete="family-name"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${props.uniqueError ? "ring-red-400" : "ring-gray-300"} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6`}
                 />
               </div>
+              <p className={`${props.uniqueError ? "visible" : "invisible"} mt-3 text-sm font-semibold text-red-400`}>Code has already exists!</p>
             </div>
 
             <div className="col-span-3">
@@ -110,8 +135,7 @@ export default function TheEditForm(props: EditPropsType | CreatePropsType) {
                   onChange={e => setInputValues({...inputsValues, description: e.target.value})}
                   rows={1}
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  value={props.action === "edit" ? inputsValues.description : ""}
-                  defaultValue={props.action === "edit" ? props.data.description : ""}
+                  value={inputsValues.description}
                 />
               </div>
             </div>
@@ -123,12 +147,12 @@ export default function TheEditForm(props: EditPropsType | CreatePropsType) {
               <div className="mt-2">
                 <input
                   required
-                  type="text"
+                  min={0}
+                  type="number"
                   name="sort"
                   id="sort"
-                  onChange={e => setInputValues({...inputsValues, sort: e.target.value})}
-                  value={props.action === "edit" ? inputsValues.sort : 500}
-                  defaultValue={props.action === "edit" ? props.data.sort : ""}
+                  onChange={e => setInputValues({...inputsValues, sort: Number(e.target.value)})}
+                  value={inputsValues.sort}
                   autoComplete="family-name"
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />

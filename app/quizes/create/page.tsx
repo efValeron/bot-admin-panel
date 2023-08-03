@@ -3,26 +3,18 @@ import React, {useEffect, useState} from "react";
 import TheEditForm from "@/components/TheEditForm";
 import axios from "axios";
 import {AxiosHeaders, mainUrl} from "@/app/axiosParams";
-import {useRouter} from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
-type PropsType = {
-  params: {
-    id: string
-  }
-}
-
-export type EditBodyType = {
-  _id: string
+export type CreateBodyType = {
+  _id?: string
   code: string
+  description: string
   name: string
   sort: number
   active: boolean
-  answerCount?: number
-  questionCount?: number
-  description?: string
 }
 
-export default function Edit(props: PropsType) {
+export default function Edit() {
   const router = useRouter()
   const [quizData, setQuizData] = useState({
     "_id": "",
@@ -36,39 +28,27 @@ export default function Edit(props: PropsType) {
   const [errorMessage, setErrorMessage] = useState("")
   const [uniqueError, setUniqueError] = useState(false)
 
-  const fetchData = async (url: string) => {
-    try {
-      const response = await axios.get(url, {
-        headers: AxiosHeaders
-      })
-      setQuizData(response.data.data)
-    } catch (error) {
-      console.warn('Error fetching data:', error)
-    }
-  }
-
   const setUniqueErrorFunc = (state: boolean) => {
     setUniqueError(state)
   }
 
-  const updateQuiz = async (data: EditBodyType) => {
-    const url: string = `${mainUrl}/${data._id}/update`
+  const addQuiz = async (data: CreateBodyType) => {
+    const url: string = `${mainUrl}`
 
     const body = {
       name: data.name,
       description: data.description,
       sort: data.sort,
       active: data.active,
+      code: data.code
     }
-
-    if (data.code !== quizData.code)
-      Object.assign(body, {code: data.code})
 
     try {
       const response = await axios.post(url, {
         headers: AxiosHeaders,
         ...body
       })
+      console.log(response)
       router.push("/quizes")
     } catch (error) {
       // @ts-ignore
@@ -84,15 +64,10 @@ export default function Edit(props: PropsType) {
     }
   }
 
-  useEffect(() => {
-    const url: string = `${mainUrl}/${props.params.id}`
-    fetchData(url)
-  }, [])
-
   return (
     <div className="w-full h-full bg-white">
       <div className="w-full justify-between flex flex-row p-4 bg-bg-white-lighter">
-        <h1 className="font-medium text-3xl text-text-gray p-4 hidden md:block">Edit quiz</h1>
+        <h1 className="font-medium text-3xl text-text-gray p-4 hidden md:block">Create quiz</h1>
 
         <div
           id="errorAlert"
@@ -116,8 +91,7 @@ export default function Edit(props: PropsType) {
       </div>
 
       <div className="flex flex-col items-center py-8">
-        <TheEditForm action={"edit"} data={quizData} id={props.params.id} updateQuiz={updateQuiz}
-                     uniqueError={uniqueError} setUniqueErrorFunc={setUniqueErrorFunc}/>
+        <TheEditForm action={"create"} data={quizData} addQuiz={addQuiz} uniqueError={uniqueError} setUniqueErrorFunc={setUniqueErrorFunc}/>
       </div>
 
     </div>
