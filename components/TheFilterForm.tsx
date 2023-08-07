@@ -3,25 +3,29 @@ import {Menu, Transition} from '@headlessui/react'
 import Link from "next/link";
 import {useRouter, useSearchParams } from 'next/navigation'
 
+type ShowType = {
+  showFrom: number
+  showTo: number
+  showTotal: number
+}
+
 type PropsType = {
   tableType: "clients" | "quizes"
   setResultsPerPageFilterHandle: (result: number) => void
   resultPerPage: number
+  changeFilterActiveHandlerFunc: (filter: string) => void
+  currentActiveFilter: string
+  showInfo: ShowType
 }
 
 export default function TheFilterForm(props: PropsType) {
-  const [filter, setFilter] = useState("All")
-  const searchParams = useSearchParams()
-  const router = useRouter()
 
   const classNames = (...classes: any[]) => {
     return classes.filter(Boolean).join(' ')
   }
-
   const capitalizedString = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
-  const activeFilterHandler = (setToFilter: string) => {
-    setFilter(setToFilter)
-    router.push(`/quizes?filter[active]=${setToFilter === "active" ? "true" : "false"}`)
+  const changeActiveFilterHandler = (setToFilter: string) => {
+    props.changeFilterActiveHandlerFunc(setToFilter)
   }
 
   return (
@@ -121,7 +125,7 @@ export default function TheFilterForm(props: PropsType) {
               <div>
                 <Menu.Button
                   className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                  Active: {capitalizedString(filter)}
+                  Active: {capitalizedString(props.currentActiveFilter)}
                   <svg className="-mr-1 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg"
                        viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
                        strokeLinejoin="round">
@@ -146,7 +150,7 @@ export default function TheFilterForm(props: PropsType) {
                       {({active}) => (
                         <button
                           type="button"
-                          onClick={() => activeFilterHandler("all")}
+                          onClick={() => changeActiveFilterHandler("all")}
                           className={classNames(
                             active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                             'block w-full px-4 py-2 text-left text-sm'
@@ -162,7 +166,7 @@ export default function TheFilterForm(props: PropsType) {
                       {({active}) => (
                         <button
                           type="button"
-                          onClick={() => activeFilterHandler("active")}
+                          onClick={() => changeActiveFilterHandler("active")}
                           className={classNames(
                             active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                             'block w-full px-4 py-2 text-left text-sm'
@@ -176,7 +180,7 @@ export default function TheFilterForm(props: PropsType) {
                       {({active}) => (
                         <button
                           type="button"
-                          onClick={() => activeFilterHandler("disabled")}
+                          onClick={() => changeActiveFilterHandler("disabled")}
                           className={classNames(
                             active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                             'block w-full px-4 py-2 text-left text-sm'
@@ -196,7 +200,7 @@ export default function TheFilterForm(props: PropsType) {
       <div className="border-t divide-y divide-gray-200 dark:border-gray-700 dark:divide-gray-700">
         <div
           className="w-full text-sm text-icon-hover py-2 px-4 tracking-wide flex flex-row items-center justify-between">
-          <p>Showing 11 - 20 of 64 results</p>
+          <p>Showing {props.showInfo.showFrom} - {props.showInfo.showTo} of {props.showInfo.showTotal} results</p>
           <div className="flex flex-row items-center gap-2">
             <p>Results per page:</p>
             <Menu as="div" className="relative inline-block text-left">
@@ -229,13 +233,13 @@ export default function TheFilterForm(props: PropsType) {
                       {({active}) => (
                         <button
                           type="button"
-                          onClick={() => props.setResultsPerPageFilterHandle(1)}
+                          onClick={() => props.setResultsPerPageFilterHandle(10)}
                           className={classNames(
                             active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                             'block w-full px-4 py-2 text-left text-sm'
                           )}
                         >
-                          1
+                          10
                         </button>
                       )}
                     </Menu.Item>
@@ -243,13 +247,13 @@ export default function TheFilterForm(props: PropsType) {
                       {({active}) => (
                         <button
                           type="button"
-                          onClick={() => props.setResultsPerPageFilterHandle(2)}
+                          onClick={() => props.setResultsPerPageFilterHandle(20)}
                           className={classNames(
                             active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                             'block w-full px-4 py-2 text-left text-sm'
                           )}
                         >
-                          2
+                          20
                         </button>
                       )}
                     </Menu.Item>
@@ -257,13 +261,13 @@ export default function TheFilterForm(props: PropsType) {
                       {({active}) => (
                         <button
                           type="button"
-                          onClick={() => props.setResultsPerPageFilterHandle(3)}
+                          onClick={() => props.setResultsPerPageFilterHandle(50)}
                           className={classNames(
                             active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                             'block w-full px-4 py-2 text-left text-sm'
                           )}
                         >
-                          3
+                          50
                         </button>
                       )}
                     </Menu.Item>

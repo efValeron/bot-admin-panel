@@ -5,20 +5,27 @@ import {ClientsTableDataType} from "../app/clients/page";
 import {QuizesTableDataType} from "@/app/quizes/page";
 import TheModal from "@/components/TheModal";
 import Link from "next/link";
-import {useRouter} from 'next/navigation'
+
+type ShowType = {
+  showFrom: number
+  showTo: number
+  showTotal: number
+}
 
 type PropsType = {
   resultPerPage: number
-  setResultsPerPagePageHandle: (result: number) => void
   tableData: ClientsTableDataType | QuizesTableDataType
   deleteQuizFunc: (quizId: string) => void
+  changeFilterActiveHandlerFunc: (filter: string) => void
+  currentActiveFilter: string
+  changeResultPerPageHandlerFunc: (result: number) => void
+  showInfo: ShowType
 }
 
 export default function TheTable(props: PropsType) {
   const [modalOpen, setModalOpen] = useState(false)
-  const [formOpen, setFormOpen] = useState(false)
+  // const [formOpen, setFormOpen] = useState(false)
   const [deleteQuiz, setDeleteQuiz] = useState("")
-  const router = useRouter()
 
   const closeModalFunc = (state: boolean) => {
     if (state !== modalOpen)
@@ -39,7 +46,7 @@ export default function TheTable(props: PropsType) {
   }
 
   const setResultsPerPageFilterHandle = (result: number) => {
-    if (result !== props.resultPerPage) props.setResultsPerPagePageHandle(result)
+    if (result !== props.resultPerPage) props.changeResultPerPageHandlerFunc(result)
   }
 
   return (
@@ -49,7 +56,8 @@ export default function TheTable(props: PropsType) {
 
       <div className="min-w-full inline-block align-middle">
         <TheFilterForm setResultsPerPageFilterHandle={setResultsPerPageFilterHandle} resultPerPage={props.resultPerPage}
-                       tableType={props.tableData.tableType}/>
+                       tableType={props.tableData.tableType} changeFilterActiveHandlerFunc={props.changeFilterActiveHandlerFunc} currentActiveFilter={props.currentActiveFilter}
+        showInfo={props.showInfo}/>
 
         <div
           className="overflow-x-auto w-full border-t divide-y divide-gray-200 dark:border-gray-700 dark:divide-gray-700">
